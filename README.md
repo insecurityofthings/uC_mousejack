@@ -1,5 +1,5 @@
-Arduino Mousejack
-----------------
+uC Mousejack
+-------------
 
 This is some basic test code to get MouseJack going with an Adafruit Feather 32u4 protoboard and a SPI-based NRF24L01+ module.
 
