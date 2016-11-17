@@ -1,4 +1,4 @@
-uC Mousejack
+μC Mousejack
 -------------
 
 Microcontroller Mousejack is a project to get [Mousejack](https://www.mousejack.com) attacks into a small embedded device, with the form factor of a key chain.
@@ -17,7 +17,7 @@ To build your own device you'll need the following components:
  - An SPI-based [NRF24L01+ module](http://www.icstation.com/22dbm-100mw-nrf24l01ppalna-wireless-transmission-module-p-4677.html). Buying an amplified NRF24 module with an external antenna is highly recommended.
  - A [LiPo battery](https://www.adafruit.com/products/1578). A 500mAh battery will run for about 20 hours.
  - A case to house the components. A [Hammond 1551KTBU](http://www.hammondmfg.com/dwg9TBU.htm) works nicely. You can usually buy these at your local electronics store.
- - A 100uF and a 0.1uF capacitor to help stabilize the voltage for the NRF24 module (it's finicky).
+ - A 10μF and a 0.1μF capacitor to help stabilize the voltage for the NRF24 module (it's finicky).
  - Double-sided adhesive tape, or mounting hardware. Depending on how polished you'd like the final product to be.
  - Tools: Wire strippers, side cutters, a good soldering iron.
  - Basics, such as solder, polyamide tape, small flexible multicolor wire.
@@ -26,7 +26,7 @@ To build your own device you'll need the following components:
 
  ![Mousejack Fritzing Design](https://raw.githubusercontent.com/phikshun/uC_mousejack/master/tools/mousejack.png)
 
- In addition to the components above, it is recommended to use the two capacitors (100uF and 0.1uF between the NRF24 power and ground pins). Also note that soldering the NRF24 module directly into the Feather protoboard helps keep things compact.
+ The capacitors shown above are 10μF and 0.1μF. Also note that soldering the NRF24 module directly into the Feather protoboard helps keep things compact.
 
  Building
  --------
