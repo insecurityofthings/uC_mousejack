@@ -21,7 +21,7 @@ To build your own device you'll need the following components:
 
  ![Mousejack Fritzing Design](https://raw.githubusercontent.com/dnatividade/Arduino_mousejack/master/img/Arduino-MouseJack2_bb.png)
 
- The capacitor shown above are 10μF and 0.1μF. Also note that soldering the NRF24 module directly into the Feather protoboard helps keep things compact.
+ The capacitor shown above is 10μF. Also note that soldering the NRF24 module directly into the Feather protoboard helps keep things compact.
 
  Building
  --------
