@@ -1,7 +1,7 @@
-μC Mousejack
--------------
+Arduino Mousejack
+-----------------
 
-Microcontroller Mousejack is a project to get [Mousejack](https://www.mousejack.com) attacks into a small embedded device, with the form factor of a key chain.
+Microcontroller Mousejack is a project, based on **uC_mousejeck** by **[insecuritythings](https://github.com/insecurityofthings/uC_mousejack)**, to get [Mousejack](https://www.mousejack.com) attacks into a small embedded device, with the form factor of a key chain.
 
 ![Prototype Mousejack Device](https://pbs.twimg.com/media/CreAfASVUAABIkJ.jpg:small)
 
