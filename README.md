@@ -3,7 +3,7 @@ Arduino Mousejack
 
 Arduino Mousejack is a project, based on **uC_mousejeck** by **[insecuritythings](https://github.com/insecurityofthings/uC_mousejack)**, to get [Mousejack](https://www.mousejack.com) attacks into a small embedded device, with the form factor of a key chain.
 
-![Prototype Mousejack Device](https://pbs.twimg.com/media/CreAfASVUAABIkJ.jpg:small)
+![Prototype Mousejack Device](https://store.arduino.cc/usa/arduino-uno-rev3:small)
 
 Building the device is straight-forward, and the code provides a tool to use Duckyscript to launch automated keystroke injection attacks against Microsoft and Logitech devices.
 
@@ -11,7 +11,7 @@ Construction
 ------------
 
 To build your own device you'll need the following components:
- - [Adafruit Feather 32u4 protoboard](https://www.adafruit.com/products/2771) or another Arduino-compatible board of your choice.
+ - [Arduino UNO](https://www.adafruit.com/products/2771) or another Arduino-compatible board of your choice.
  - An SPI-based [NRF24L01+ module](http://www.icstation.com/22dbm-100mw-nrf24l01ppalna-wireless-transmission-module-p-4677.html). Buying an amplified NRF24 module with an external antenna is highly recommended.
  - A [LiPo battery](https://www.adafruit.com/products/1578). A 500mAh battery will run for about 20 hours.
  - A case to house the components. A [Hammond 1551KTBU](http://www.hammondmfg.com/dwg9TBU.htm) works nicely. You can usually buy these at your local electronics store.
