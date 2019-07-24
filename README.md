@@ -5,8 +5,6 @@ Arduino Mousejack is a project, based on **uC_mousejeck** by **[insecuritythings
 
 ![Prototype Mousejack Device](https://pbs.twimg.com/media/CreAfASVUAABIkJ.jpg:small)
 
-Our first iteration uses an [Adafruit Feather 32u4 protoboard](https://www.adafruit.com/products/2771) and a SPI-based [NRF24L01+ module](http://www.icstation.com/22dbm-100mw-nrf24l01ppalna-wireless-transmission-module-p-4677.html).
-
 Building the device is straight-forward, and the code provides a tool to use Duckyscript to launch automated keystroke injection attacks against Microsoft and Logitech devices.
 
 Construction
