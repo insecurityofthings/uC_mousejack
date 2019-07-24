@@ -13,10 +13,7 @@ Construction
 To build your own device you'll need the following components:
  - [Arduino UNO](https://www.adafruit.com/products/2771) or another Arduino-compatible board of your choice.
  - An SPI-based [NRF24L01+ module](http://www.icstation.com/22dbm-100mw-nrf24l01ppalna-wireless-transmission-module-p-4677.html). Buying an amplified NRF24 module with an external antenna is highly recommended.
- - A [LiPo battery](https://www.adafruit.com/products/1578). A 500mAh battery will run for about 20 hours.
- - A case to house the components. A [Hammond 1551KTBU](http://www.hammondmfg.com/dwg9TBU.htm) works nicely. You can usually buy these at your local electronics store.
- - A 10μF and a 0.1μF capacitor to help stabilize the voltage for the NRF24 module (it's finicky).
- - Double-sided adhesive tape, or mounting hardware. Depending on how polished you'd like the final product to be.
+ - A 10μF capacitor to help stabilize the voltage for the NRF24 module.
  - Tools: Wire strippers, side cutters, a good soldering iron.
  - Basics, such as solder, polyamide tape, small flexible multicolor wire.
 
@@ -24,7 +21,7 @@ To build your own device you'll need the following components:
 
  ![Mousejack Fritzing Design](https://raw.githubusercontent.com/dnatividade/Arduino_mousejack/master/img/Arduino-MouseJack2_bb.png)
 
- The capacitors shown above are 10μF and 0.1μF. Also note that soldering the NRF24 module directly into the Feather protoboard helps keep things compact.
+ The capacitor shown above are 10μF and 0.1μF. Also note that soldering the NRF24 module directly into the Feather protoboard helps keep things compact.
 
  Building
  --------
@@ -34,7 +31,7 @@ To build your own device you'll need the following components:
  Before building the software, be sure to modify the `attack.h` file using the `attack_generator.py` script:
 
  ```
- uC-mousejack $ cd tools
+ Arduino-mousejack $ cd tools
  tools $ ./attack_generator.py ducky.txt
  ```
 
