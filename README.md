@@ -10,23 +10,20 @@ Building the device is straight-forward, and the code provides a tool to use Duc
 Construction
 ------------
 
-To build your own device you'll need the following components:
+Components list:
  - [Arduino UNO](https://www.adafruit.com/products/2771) or another Arduino-compatible board of your choice.
- - An SPI-based [NRF24L01+ module](http://www.icstation.com/22dbm-100mw-nrf24l01ppalna-wireless-transmission-module-p-4677.html). Buying an amplified NRF24 module with an external antenna is highly recommended.
+ - [NRF24L01+ module](http://www.icstation.com/22dbm-100mw-nrf24l01ppalna-wireless-transmission-module-p-4677.html) or another compatible device.
  - A 10μF capacitor to help stabilize the voltage for the NRF24 module.
- - Tools: Wire strippers, side cutters, a good soldering iron.
- - Basics, such as solder, polyamide tape, small flexible multicolor wire.
+ - Wires to connections.
 
  The Fritzing diagram below shows the wiring layout used in the prototype design:
 
  ![Mousejack Fritzing Design](https://raw.githubusercontent.com/dnatividade/Arduino_mousejack/master/img/Arduino-MouseJack2_bb.png)
 
- The capacitor shown above is 10μF. Also note that soldering the NRF24 module directly into the Feather protoboard helps keep things compact.
-
  Building
  --------
 
- To build the software, download and install the [PlatformIO IDE](http://platformio.org/platformio-ide). It sucks much less than the Arduino IDE.
+ To build the software, download and install the [PlatformIO IDE](http://platformio.org/platformio-ide).
 
  Before building the software, be sure to modify the `attack.h` file using the `attack_generator.py` script:
 
@@ -42,9 +39,9 @@ To build your own device you'll need the following components:
 
  Once you power the device on, the internal LED connected to pin 13 (called ledpin in the code), will blink two times for each pass over the entire channel range. When it sends an attack, the LED will glow solid.
 
- If you monitor the serial port using the PlatformIO IDE, you will see a lot of debugging information being printed while scanning and during attack.
+ If you monitor the serial port using the PlatformIO IDE, you will see the radio information details and a lot of debugging information being printed while scanning and during attack.
 
- Warning: No interaction is required to initiate an attack. Be careful where you use this device. We do not accept any responsibility for how this tool is used.
+ Warning: No interaction is required to initiate an attack.
 
  Future
  ------
