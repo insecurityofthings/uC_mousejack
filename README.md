@@ -46,6 +46,4 @@ Components list:
  Future
  ------
 
- Our next iteration will feature a micro-Python version using the ESP8266-based Adafruit Huzzah module. This will provide the capability to load new attacks and obtain diagnostic information using your smartphone (via Wifi).
-
- It's also possible (and fairly easy) to adapt our code to use an OLED display, microSD card, or any other interaction you can think of. Feel free to fork the code and make something cooler.
+ As future work, we will create a python program to interact with arduino, passing parameters to the runtime attack.
