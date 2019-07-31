@@ -1,4 +1,4 @@
-Arduino Mousejack (ShutDô)
+Arduino Mousejack (ShutDô) ![projects-microcontroller](https://img.shields.io/badge/projects-microcontroller-blue)
 -----------------
 
 Arduino Mousejack is a project, based on **uC_mousejeck** by **[insecuritythings](https://github.com/insecurityofthings/uC_mousejack)**, to get [Mousejack](https://www.mousejack.com) attacks into a small embedded device, with the form factor of a key chain.
