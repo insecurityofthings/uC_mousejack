@@ -26,7 +26,7 @@ After some mouse interactions, Arduno is able to access the victim's mouse dongl
 
  In testing, the following keystrokes were sent:
 ```
-WIN + r (to open the run)
+WIN + r (to open "run")
 cmd [ENTER]
 shutdown -f -s -t 0 [ENTER]
 ```
