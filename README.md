@@ -43,7 +43,7 @@ Components list:
 
  Warning: No interaction is required to initiate an attack.
  
-  More information about the tests performed, as well as the difficulties encountered, can be found in the *testing* directory.
+  **More information about the tests performed, as well as the difficulties encountered, can be found in the [testing](./testing/) directory.**
 
  Future
  ------
