@@ -38,6 +38,7 @@ For this reason, the project was codenamed "ShutDô".
 
 ---
 
-The next test will be performed with an arduino + Nordic rf24 built-in device to eliminate interference issues and poor connection contact.
+The next test will be performed with RF-Nano (an arduino + Nordic rf24 built-in device) to eliminate interference issues and poor connection contact.
+[RF-Nano](https://raw.githubusercontent.com/dnatividade/Arduino_mousejack/master/img/rf-nano.jpeg)
 
 **Soon we will have more results ...**
