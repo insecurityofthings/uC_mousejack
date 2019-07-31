@@ -34,14 +34,16 @@ Components list:
 
  In the example above, the ducky.txt file contains our [Duckyscript](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Duckyscript). The `attack_generator.py` script will "compile" the ducky script into the `attack.h` file, which is included in `main.cpp`. This simplifies the code and makes it more compact.
 
- Using
- -----
+ Testing
+ -------
 
  Once you power the device on, the internal LED connected to pin 13 (called ledpin in the code), will blink two times for each pass over the entire channel range. When it sends an attack, the LED will glow solid.
 
  If you monitor the serial port using the PlatformIO IDE, you will see the radio information details and a lot of debugging information being printed while scanning and during attack.
 
  Warning: No interaction is required to initiate an attack.
+ 
+  More information about the tests performed, as well as the difficulties encountered, can be found in the *testing* directory.
 
  Future
  ------
