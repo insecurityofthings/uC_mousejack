@@ -48,4 +48,9 @@ Components list:
  Future
  ------
 
- As future work, we will create a python program to interact with arduino, passing parameters to the runtime attack.
+ As future work:
+ - to create a python program to interact with arduino, passing parameters to the runtime attack;
+ - to test the same project with Arduino NanoRF.
+ 
+ 
+ 
