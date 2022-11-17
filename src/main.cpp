@@ -13,7 +13,7 @@
 
 RF24 radio(CE, CSN);
 
-long time;
+long time_;
 int ledpin = 13;
 uint64_t promisc_addr = 0xAALL;
 uint8_t channel = 25;
@@ -138,8 +138,8 @@ void scan() {
     //Serial.println(2400 + channel);
     radio.setChannel(channel);
 
-    time = millis();
-    while (millis() - time < wait)
+    time_ = millis();
+    while (millis() - time_ < wait)
     {
       if (radio.available())
       {
